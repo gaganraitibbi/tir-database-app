@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SBI TIR Database — Ready App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header class="app-header">
+    <h1>भूमि सत्यापन / TIR Database</h1>
+    <div class="srno-wrap">
+      <label>Sr. No.</label>
+      <input type="text" id="srNo" placeholder="Auto/Manual" />
+      <button class="btn ghost" id="resetSrBtn" title="Reset all saved data">Reset All</button>
+    </div>
+  </header>
+
+  <!-- Stepper -->
+  <nav class="stepper">
+    <button class="step-node active" data-goto="1"><span>1</span> बैंक/उधारकर्ता</button>
+    <button class="step-node" data-goto="2"><span>2</span> प्रॉपर्टी विवरण</button>
+    <button class="step-node" data-goto="3"><span>3</span> प्रीव्यू/एक्सपोर्ट</button>
+  </nav>
+
+  <main class="container">
+    <!-- STEP 1 -->
+    <section id="step1" class="step active">
+      <h2>Step 1: बैंक एवं उधारकर्ता विवरण</h2>
+      <div class="grid two">
+        <div class="field"><label>Date</label><input type="date" id="bankDate" /></div>
+        <div class="field"><label>Bank Name</label>
+          <select id="bankName">
+            <option value="">-- Select --</option>
+            <option value="State Bank of India">State Bank of India</option>
+            <option value="Punjab National Bank">Punjab National Bank</option>
+            <option value="Rajasthan Gramin Bank">Rajasthan Gramin Bank</option>
+            <option value="Punjab & Sind Bank">Punjab & Sind Bank</option>
+          </select>
+        </div>
+        <div class="field">
+  <label>Branch (Hindi)</label>
+  <input type="text" id="branchHindi" class="hindi-input" lang="hi" autocomplete="off" spellcheck="false">
+</div>
+
+<div class="field">
+  <label>Branch (English)</label>
+  <input type="text" id="branchEnglish">
+</div>
+
+<div class="field">
+  <label>Borrower Name (Hindi)</label>
+  <input type="text" id="nameHindi" class="hindi-input" lang="hi" autocomplete="off" spellcheck="false">
+</div>
+
+<div class="field">
+  <label>Borrower Name (English)</label>
+  <input type="text" id="nameEnglish">
+</div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="s1SaveNext">Save & Next →</button>
+      </div>
+    </section>
+
+    <!-- STEP 2 -->
+    <section id="step2" class="step">
+      <h2>Step 2: Property Details</h2>
+
+      <!-- Multiple Property Sets -->
+      <div id="propertySetContainer"></div>
+
+      <!-- Add More Property Button -->
+      <div class="actions">
+        <button class="btn add" id="btnAddPropertySet">+ Add More Property</button>
+      </div>
+
+      <!-- Grand Totals (as full table) -->
+      <div class="card">
+        <h3>Grand Total Land of Borrower</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Total (Hectare)</th>
+              <th>Command</th>
+              <th>Uncommand</th>
+              <th>G.M. Khala</th>
+              <th>G.M. Rasta</th>
+              <th>G.M. Kuan</th>
+              <th>Nahari</th>
+              <th>Nali 1st</th>
+              <th>Nali 2nd</th>
+              <th>Barani 1st</th>
+              <th>Acre</th>
+              <th>Bigha/Biswa</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td id="gTotalLand">0.0000</td>
+              <td id="gCommand">0.000</td>
+              <td id="gUncommand">0.000</td>
+              <td id="gKhala">0.000</td>
+              <td id="gRasta">0.000</td>
+              <td id="gKuan">0.000</td>
+              <td id="gNahari">0.000</td>
+              <td id="gNali1">0.000</td>
+              <td id="gNali2">0.000</td>
+              <td id="gBarani1">0.000</td>
+              <td id="gAcre">0.00</td>
+              <td><span id="gBigha">0</span>/<span id="gBiswa">0</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- New Boundaries Card -->
+      <div class="card boundaries-card">
+        <h3>Boundaries</h3>
+        <div class="grid four">
+          <div class="field">
+            <label>North</label>
+            <input type="text" id="boundaryNorth" placeholder="Enter North boundary">
+          </div>
+          <div class="field">
+            <label>South</label>
+            <input type="text" id="boundarySouth" placeholder="Enter South boundary">
+          </div>
+          <div class="field">
+            <label>East</label>
+            <input type="text" id="boundaryEast" placeholder="Enter East boundary">
+          </div>
+          <div class="field">
+            <label>West</label>
+            <input type="text" id="boundaryWest" placeholder="Enter West boundary">
+          </div>
+        </div>
+      </div>
+
+            <!-- Encumbrance Card -->
+      <div class="card encumbrance-card">
+        <h3>Encumbrance</h3>
+        <div class="field">
+          <label>Encumbrance Status</label>
+          <select id="encumbranceStatus">
+            <option value="">-- Select Status --</option>
+            <option value="mortgaged">1. The Land/Share of Borrower(s) is already mortgaged in favour of (Bank) Branch (Branch)</option>
+            <option value="free">2. The Land/Share of Borrower(s) is free from all encumbrances</option>
+            <option value="mortgagedPartial">3. The Land/Share of Borrower {manual input} is already mortgaged in favour of (Bank) Branch (Branch)</option>
+          </select>
+        </div>
+        <div class="field" id="encumbranceManualWrap" style="display:none;">
+          <label>Enter Manual Land Details (Chak/Stone/Killa/Area)</label>
+          <input type="text" id="encumbranceManual" placeholder="Enter manual details here">
+        </div>
+      </div>
+
+      <!-- ===== SR Detail Card ===== -->
+      <div class="card sr-detail-card">
+        <h3>SR Detail</h3>
+        <div id="srDetailContainer"></div>
+        <button type="button" class="btn add" id="btnAddSRDetail">+ Add More SR Detail</button>
+      </div>
+
+      <!-- Template for SR Detail Row -->
+      <template id="tplSRDetail">
+  <div class="grid four sr-detail-row" style="margin-bottom:10px;">
+    <div class="field">
+      <label>S.R. Office</label>
+      <input type="text" class="srOffice" placeholder="Enter S.R. Office" />
+    </div>
+    <div class="field">
+      <label>Receipt No.</label>
+      <input type="number" class="srReceipt" placeholder="Enter Receipt No." />
+    </div>
+    <div class="field">
+      <label>Chalan GRN</label>
+      <input type="text" class="srGrn" placeholder="Enter Chalan GRN" />
+    </div>
+    <div class="field">
+      <label>&nbsp;</label>
+      <button type="button" class="btnRemoveSR danger-btn">Remove</button>
+    </div>
+  </div>
+</template>
+
+
+      <!-- ===== Search Detail Card ===== -->
+            <!-- ===== Search Detail Card ===== -->
+      <div class="card search-detail-card">
+        <h3>Search Detail</h3>
+        <div class="grid two">
+          <div class="field">
+            <label for="srYearFrom">Search Year From</label>
+            <input type="number" id="srYearFrom" placeholder="YYYY" min="1900" max="2100">
+          </div>
+          <div class="field">
+            <label for="srYearTo">Search Year To</label>
+            <input type="number" id="srYearTo" placeholder="YYYY" min="1900" max="2100">
+          </div>
+        </div>
+
+        <div class="grid one">
+          <div class="field">
+            <label for="searchAmount">Search Amount</label>
+            <input type="text" id="searchAmount" readonly>
+          </div>
+        </div>
+
+        <!-- 🔹 New Fields Added -->
+        <div class="grid two">
+          <div class="field">
+            <label for="giftOther">Gift / Other</label>
+            <select id="giftOther">
+              <option value="">-- Select --</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="dlcRate">DLC Rate (Per Hectare)</label>
+            <input type="number" id="dlcRate" placeholder="Enter DLC Rate" />
+          </div>
+        </div>
+
+<!-- ========= Documents Card ========= -->
+<div class="card documents-card">
+  <h3>Documents</h3>
+  <div class="grid five">
+    <div class="field">
+      <label>Jamabandi (Date)</label>
+      <input type="date" id="docJamabandi">
+    </div>
+    <div class="field">
+      <label>Girdawari (Date)</label>
+      <input type="date" id="docGirdawari">
+    </div>
+    <div class="field">
+      <label>Map of Land (Date)</label>
+      <input type="date" id="docMap">
+    </div>
+    <div class="field">
+      <label>Girdawari Samvat</label>
+      <input type="text" id="docSamvat" placeholder="Samvat Year">
+    </div>
+    <div class="field">
+      <label>Other (Optional)</label>
+      <input type="text" id="docOther" placeholder="Any other document">
+    </div>
+  </div>
+</div>
+<!-- ========= Advocate Detail Card ========= -->
+<div class="card advocate-card">
+  <h3>Advocate Detail</h3>
+  <div id="advocateContainer"></div>
+  <button type="button" class="btn add" id="btnAddAdvocate">+ Add More Advocate</button>
+</div>
+
+<!-- Template for Advocate Row -->
+<template id="tplAdvocateRow">
+  <div class="grid three advocate-row" style="margin-bottom:10px;">
+    <div class="field">
+  <label>Advocate Name</label>
+  <select id="advocateName">
+    <option value="">-- Select Advocate --</option>
+    <option value="Mahesh Kumar Gaur">Mahesh Kumar Gaur</option>
+    <option value="Bhanwar Lal Gaur">Bhanwar Lal Gaur</option>
+    <option value="other">Other (Add New)</option>
+  </select>
+</div>
+
+<!-- यह div केवल Other पर दिखेगा -->
+<div class="field" id="advocateOtherWrap" style="display:none;">
+  <label>Enter Advocate Name</label>
+  <input type="text" id="advocateOtherInput" placeholder="Enter Advocate Name manually" />
+</div>
+
+<div class="field">
+  <label>Mobile No.</label>
+  <input type="text" id="advocateMobile">
+</div>
+<div class="field">
+  <label>Chamber No.</label>
+  <input type="text" id="advocateChamber">
+</div>
+
+    <div class="field">
+      <label>&nbsp;</label>
+      <button type="button" class="btn danger btnRemoveAdvocate">Remove</button>
+    </div>
+  </div>
+</template>
+
+
+        <!-- 🔹 End New Fields -->
+
+      </div>
+
+
+      <div class="actions">
+        <button class="btn ghost goBack" data-goto="1">← Back</button>
+        <button class="btn primary" id="s2SaveNext">Save & Next →</button>
+      </div>
+    </section>
+
+    <!-- STEP 3 -->
+    <section id="step3" class="step">
+      <h2>Step 3: Preview & Export</h2>
+      <div id="previewBox" class="card"></div>
+      <div class="actions">
+        <button class="btn ghost goBack" data-goto="2">← Back</button>
+        <button class="btn warn" id="clearAllBtn">Clear Local Data</button>
+        <button class="btn success" id="finalSubmitBtn">Final Submit</button>
+        <button class="btn primary" id="exportBtn">Export to Excel</button>
+            <button class="btn primary" id="exportAllBtn">Export All</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Templates -->
+  <template id="tplPropertySet">
+    <div class="property-set">
+      <!-- Fixed Location Fields -->
+      <div class="card">
+        <h3>Land Location</h3>
+        <div class="grid five">
+          <div class="field"><label>Chak</label><input type="text" class="fixedChak"></div>
+          <div class="field"><label>Tehsil</label><input type="text" class="fixedTehsil"></div>
+          <div class="field"><label>Distt.</label><input type="text" class="fixedDistt"></div>
+          <div class="field"><label>Jamabandi Samvat</label><input type="text" class="fixedSamvat"></div>
+          <div class="field"><label>A/c No.</label><input type="text" class="fixedAcno"></div>
+        </div>
+      </div>
+
+      <!-- Dynamic Properties -->
+      <div class="card">
+        <h3>Property</h3>
+        <div class="sno-group"></div>
+        <div class="card property-totals">
+          <div class="grid five">
+            <div class="field"><label>Total Land (Hectare)</label><input type="text" name="propTotal" readonly /></div>
+            <div class="field"><label>Command</label><input type="number" step="0.001" name="propCommand" /></div>
+            <div class="field"><label>Uncommand</label><input type="number" step="0.001" name="propUncommand" /></div>
+            <div class="field"><label>G.M. Khala</label><input type="text" name="propKhala" /></div>
+            <div class="field"><label>G.M. Rasta</label><input type="text" name="propRasta" /></div>
+            <div class="field"><label>G.M. Kuan</label><input type="text" name="propKuan" /></div>
+            <div class="field"><label>Nahari</label><input type="text" name="propNahari" /></div>
+            <div class="field"><label>Nali 1st</label><input type="text" name="propNali1st" /></div>
+            <div class="field"><label>Nali 2nd</label><input type="text" name="propNali2nd" /></div>
+            <div class="field"><label>Barani 1st</label><input type="text" name="propBarani1st" /></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Share of Borrower -->
+      <div class="card borrower-share">
+        <h3>Share of Borrower</h3>
+        <div class="field">
+          <label>Share (e.g. 1/3)</label>
+          <input type="text" class="borrowerShare" placeholder="1/3, 1/2, 0.5, 50%" />
+        </div>
+      </div>
+
+      <!-- Borrower Land Details Table -->
+      <div class="card borrower-land-details">
+        <h3>Land Details of Borrower</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Total (Hectare)</th>
+              <th>Command</th>
+              <th>Uncommand</th>
+              <th>G.M. Khala</th>
+              <th>G.M. Rasta</th>
+              <th>G.M. Kuan</th>
+              <th>Nahari</th>
+              <th>Nali 1st</th>
+              <th>Nali 2nd</th>
+              <th>Barani 1st</th>
+              <th>Acre</th>
+              <th>Bigha/Biswa</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="tblTotalLand">0.0000</td>
+              <td class="tblCommand">0.0000</td>
+              <td class="tblUncommand">0.0000</td>
+              <td class="tblKhala">0.0000</td>
+              <td class="tblRasta">0.0000</td>
+              <td class="tblKuan">0.0000</td>
+              <td class="tblNahari">0.0000</td>
+              <td class="tblNali1">0.0000</td>
+              <td class="tblNali2">0.0000</td>
+              <td class="tblBarani1">0.0000</td>
+              <td class="tblAcre">0.000</td>
+              <td class="tblBighaBiswa">0/0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </template>
+
+  <!-- Templates for S.No. / K.No. -->
+  <template id="tplSNoGroup">
+    <div class="property-row grid seven compact">
+      <div class="field"><label>S.No.</label><input type="text" name="sno"></div>
+      <div class="field"><label>Murba</label><input type="text" name="murba"></div>
+      <div class="field"><label>K.No.</label><input type="text" name="kno"></div>
+      <div class="field"><label>Area (Hectare)</label><input type="number" step="0.001" name="area"></div>
+      <button class="btn add btnAddKNo" type="button">+ Add K.No.</button>
+      <button class="btn add btnAddSNo" type="button">+ Add S.No.</button>
+      <button class="btn danger btnRemoveRow" type="button">Remove</button>
+    </div>
+  </template>
+
+  <template id="tplKNoOnly">
+    <div class="property-row grid seven compact">
+      <div></div><div></div>
+      <div class="field"><label>K.No.</label><input type="text" name="kno"></div>
+      <div class="field"><label>Area (Hectare)</label><input type="number" step="0.001" name="area"></div>
+      <button class="btn add btnAddKNo" type="button">+ Add K.No.</button>
+      <button class="btn add btnAddSNo" type="button">+ Add S.No.</button>
+      <button class="btn danger btnRemoveRow" type="button">Remove</button>
+    </div>
+  </template>
+</body>
+</html>
